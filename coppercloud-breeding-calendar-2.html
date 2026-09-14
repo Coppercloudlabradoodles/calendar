@@ -1,7 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8"><!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
+<title>Coppercloud Labradoodles — Breeding Calendar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FAF7F2;
+    --cream-panel: #F3EEE4;
+    --ink: #2B2620;
+    --ink-soft: #6B6255;
+    --rule: #D8D2C4;
+    --rule-strong: #C4BCA9;
+
+    --c-heat: #B23A3A;
+    --c-heat-bg: #F7E4E1;
+    --c-due: #2F6F4F;
+    --c-due-bg: #E1EEE4;
+    --c-puppies: #C98A2C;
+    --c-puppies-bg: #F8ECD6;
+    --c-gohome: #3E5C8A;
+    --c-gohome-bg: #E3E9F2;
+
+    --today-ring: #2B2620;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    height:100%;
+    overflow: hidden;
+  }
+
+  .stage{
+    width:100vw;
+    height:100vh;
+    padding: 1.2vh 1.6vw 1vh 1.6vw;
+    display:flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 0.8vh;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 0.7vh;
+    flex-shrink:0;
+  }
+  .title-block h1{
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: 2.3vw;
+    line-height: 1;
+    margin:0;
+    letter-spacing: -0.01em;
+  }
+  .title-block .sub{
+    font-size: 0.85vw;
+    color: var(--ink-soft);
+    margin-top: 0.3vh;
+    font-weight: 500;
+  }
+
+  .legend{
+    display:flex;
+    gap: 1.4vw;
+    align-items:center;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap: 0.45vw;
+    font-size: 0.78vw;
+    font-weight: 600;
+  }
+  .legend-swatch{
+    width: 0.78vw;
+    height: 0.78vw;
+    border-radius: 2px;
+    flex-shrink:0;
+  }
+  .legend-item.heat .legend-swatch{ background: var(--c-heat); }
+  .legend-item.due .legend-swatch{ background: var(--c-due); }
+  .legend-item.puppies .legend-swatch{ background: var(--c-puppies); }
+  .legend-item.gohome .legend-swatch{ background: var(--c-gohome); }
+
+  .status-pill{
+    font-size: 0.68vw;
+    color: var(--ink-soft);
+    font-weight: 500;
+    padding: 0.3vh 0.6vw;
+    border: 1px solid var(--rule-strong);
+    border-radius: 100px;
+    white-space:nowrap;
+  }
+  .status-pill.live{ color: var(--c-due); border-color: var(--c-due); }
+  .status-pill.error{ color: var(--c-heat); border-color: var(--c-heat); }
+
+  /* ---------- Status strip ---------- */
+  .status-strip{
+    flex-shrink:0;
+    display:flex;
+    gap: 0.6vw;
+    overflow-x:auto;
+    padding-bottom: 0.7vh;
+    margin-bottom: 0.6vh;
+    border-bottom: 1px solid var(--rule);
+  }
+  .status-chip{
+    display:flex;
+    align-items:center;
+    gap: 0.4vw;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    padding: 0.45vh 0.8vw;
+    font-size: 0.72vw;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink:0;
+  }
+  .status-chip .dot{
+    width: 0.55vw;
+    height: 0.55vw;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .status-chip .chip-detail{
+    color: var(--ink-soft);
+    font-weight:500;
+  }
+  .status-chip.dot-heat .dot{ background: var(--c-heat); }
+  .status-chip.dot-due .dot{ background: var(--c-due); }
+  .status-chip.dot-puppies .dot{ background: var(--c-puppies); }
+  .status-chip.dot-gohome .dot{ background: var(--c-gohome); }
+  .status-empty{
+    font-size: 0.72vw;
+    color: var(--ink-soft);
+    font-style: italic;
+    align-self:center;
+  }
+
+  /* ---------- Grid of months ---------- */
+  .year-grid{
+    flex:1;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.8vh 0.9vw;
+    min-height:0;
+  }
+
+  .month-card{
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 0.55vh 0.65vw 0.45vh 0.65vw;
+    display:flex;
+    flex-direction: column;
+    min-height:0;
+    min-width:0;
+  }
+
+  .month-name{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1vw;
+    margin-bottom: 0.3vh;
+    flex-shrink:0;
+  }
+
+  .dow-row{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    flex-shrink:0;
+    margin-bottom: 0.15vh;
+  }
+  .dow-row span{
+    font-size: 0.55vw;
+    color: var(--ink-soft);
+    font-weight: 600;
+    text-align:center;
+  }
+
+  .calendar-body{
+    position: relative;
+    flex:1;
+    min-height:0;
+  }
+
+  .day-grid, .events-layer{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    position:absolute;
+    inset:0;
+  }
+
+  .day-cell{
+    position:relative;
+    border-radius: 3px;
+    background: var(--cream);
+  }
+  .day-cell.empty{ background: transparent; }
+
+  .day-num{
+    position:absolute;
+    top: 1px; left: 2px;
+    font-size: 0.52vw;
+    color: var(--ink-soft);
+    font-weight: 500;
+    line-height:1;
+  }
+  .day-cell.is-today .day-num{
+    color: white;
+    background: var(--today-ring);
+    border-radius: 50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 1vw;
+    height: 1vw;
+    font-weight:700;
+  }
+
+  .events-layer{
+    pointer-events:none;
+  }
+  .ev-block{
+    align-self: end;
+    margin-bottom: 1px;
+    border-radius: 2px;
+    font-size: 0.46vw;
+    font-weight: 700;
+    color: white;
+    padding: 0 2px;
+    line-height: 1.5;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+  }
+  .ev-heat{ background: var(--c-heat); }
+  .ev-due{ background: var(--c-due); }
+  .ev-puppies{ background: var(--c-puppies); }
+  .ev-gohome{ background: var(--c-gohome); }
+
+  .ev-block-narrow{
+    overflow: visible;
+    position: relative;
+    z-index: 2;
+    width: max-content;
+    max-width: none;
+    padding-right: 4px;
+  }
+
+  footer{
+    flex-shrink:0;
+    text-align:center;
+    padding-top: 0.5vh;
+    font-size: 0.65vw;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 900px){
+    .stage{ overflow: auto; height:auto; }
+    .year-grid{ grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(6,minmax(220px,1fr)); }
+    .title-block h1{ font-size: 5vw; }
+    .legend{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <header>
+    <div class="title-block">
+      <h1>Coppercloud Labradoodles</h1>
+      <div class="sub" id="yearLabel">2026 Breeding Calendar</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item heat"><span class="legend-swatch"></span>Heat</div>
+      <div class="legend-item due"><span class="legend-swatch"></span>Due Date</div>
+      <div class="legend-item puppies"><span class="legend-swatch"></span>Puppies in House</div>
+      <div class="legend-item gohome"><span class="legend-swatch"></span>Go-Home Day</div>
+      <div class="status-pill" id="statusPill">Loading calendar…</div>
+    </div>
+  </header>
+
+  <div class="status-strip" id="statusStrip"></div>
+
+  <div class="year-grid" id="yearGrid"></div>
+
+  <footer id="footerNote">Showing sample data — connect your Google Calendar to see live dates.</footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const ICAL_URL = "https://calendar.google.com/calendar/ical/d70399a2996c3e6a38e41b10ce8978770b00d67fdc81c179d85751163730e7fb%40group.calendar.google.com/private-d888b8d67af6ba892fbae8c11dd0eac5/basic.ics";
+
+const CORS_PROXIES = [
+  url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+  url => "https://corsproxy.io/?url=" + encodeURIComponent(url),
+  url => "https://thingproxy.freeboard.io/fetch/" + url,
+];
+
+const YEAR = new Date().getFullYear();
+
+const KEYWORD_MAP = [
+  { re: /heat|cycle/i,     type: "heat" },
+  { re: /due/i,      type: "due" },
+  { re: /puppies|puppy|in house|in-house/i, type: "puppies" },
+  { re: /go[\s-]?home/i, type: "gohome" },
+];
+
+const TYPE_LABELS = { heat: "Heat", due: "Due Date", puppies: "Puppies in House", gohome: "Puppy Go-Home Date" };
+
+/* ============================================================
+   SAMPLE DATA
+   ============================================================ */
+const SAMPLE_EVENTS = [
+  { title: "Bella — Heat", type: "heat", start: `${YEAR}-01-14` },
+  { title: "Bella — Due Date", type: "due", start: `${YEAR}-03-18` },
+  { title: "Bella's Litter — Puppies in House", type: "puppies", start: `${YEAR}-03-18`, end: `${YEAR}-05-13` },
+  { title: "Bella's Litter — Go Home Day", type: "gohome", start: `${YEAR}-05-13` },
+
+  { title: "Daisy — Heat", type: "heat", start: `${YEAR}-02-02` },
+  { title: "Daisy — Due Date", type: "due", start: `${YEAR}-04-07` },
+  { title: "Daisy's Litter — Puppies in House", type: "puppies", start: `${YEAR}-04-07`, end: `${YEAR}-06-02` },
+  { title: "Daisy's Litter — Go Home Day", type: "gohome", start: `${YEAR}-06-02` },
+
+  { title: "Luna — Heat", type: "heat", start: `${YEAR}-03-28` },
+  { title: "Luna — Due Date", type: "due", start: `${YEAR}-06-01` },
+  { title: "Luna's Litter — Puppies in House", type: "puppies", start: `${YEAR}-06-01`, end: `${YEAR}-07-27` },
+  { title: "Luna's Litter — Go Home Day", type: "gohome", start: `${YEAR}-07-27` },
+
+  { title: "Rosie — Heat", type: "heat", start: `${YEAR}-05-10` },
+  { title: "Rosie — Due Date", type: "due", start: `${YEAR}-07-14` },
+  { title: "Rosie's Litter — Puppies in House", type: "puppies", start: `${YEAR}-07-14`, end: `${YEAR}-09-08` },
+  { title: "Rosie's Litter — Go Home Day", type: "gohome", start: `${YEAR}-09-08` },
+
+  { title: "Willow — Heat", type: "heat", start: `${YEAR}-07-20` },
+  { title: "Willow — Due Date", type: "due", start: `${YEAR}-09-23` },
+  { title: "Willow's Litter — Puppies in House", type: "puppies", start: `${YEAR}-09-23`, end: `${YEAR}-11-18` },
+  { title: "Willow's Litter — Go Home Day", type: "gohome", start: `${YEAR}-11-18` },
+
+  { title: "Maple — Heat", type: "heat", start: `${YEAR}-09-05` },
+  { title: "Maple — Due Date", type: "due", start: `${YEAR}-11-09` },
+  { title: "Maple's Litter — Puppies in House", type: "puppies", start: `${YEAR}-11-09`, end: `${YEAR+1}-01-04` },
+];
+
+/* ============================================================
+   Date helpers
+   ============================================================ */
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function parseYMD(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+function dayDiff(a,b){ return Math.round((b-a)/(1000*60*60*24)); }
+
+function extractName(title){
+  // Prefer splitting on the first dash/em-dash/colon separator, e.g.
+  // "Sailor - Date" -> "Sailor", "Bella's Litter — Puppies in House" -> "Bella's Litter"
+  const splitMatch = title.match(/^(.*?)\s*[-\u2014:]\s*(.+)$/);
+  if (splitMatch && splitMatch[1].trim()) {
+    return splitMatch[1].trim();
+  }
+  // fallback: strip known keywords out of the whole title
+  let name = title;
+  KEYWORD_MAP.forEach(k => { name = name.replace(k.re, ''); });
+  name = name.replace(/[\u2014\-:]+$/,'').replace(/^[\u2014\-:]+/,'').trim();
+  return name || title;
+}
+
+/* ============================================================
+   Status strip: "Happening Now" + "Coming Up"
+   ============================================================ */
+function buildStatusStrip(events){
+  const strip = document.getElementById('statusStrip');
+  strip.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const enriched = events.map(ev => {
+    const start = parseYMD(ev.start);
+    const end = ev.end ? parseYMD(ev.end) : start;
+    return { ...ev, startD: start, endD: end, name: extractName(ev.title) };
+  });
+
+  const active = enriched.filter(e => e.startD <= today && today <= e.endD)
+    .sort((a,b) => a.startD - b.startD);
+  const upcoming = enriched.filter(e => e.startD > today)
+    .sort((a,b) => a.startD - b.startD)
+    .slice(0, 10);
+
+  if (active.length === 0 && upcoming.length === 0) {
+    strip.innerHTML = '<div class="status-empty">No upcoming events found.</div>';
+    return;
+  }
+
+  active.forEach(e => {
+    const totalDays = dayDiff(e.startD, e.endD) + 1;
+    const elapsed = dayDiff(e.startD, today) + 1;
+    const detail = e.endD > e.startD
+      ? `Day ${elapsed} of ${totalDays}`
+      : 'Today';
+    strip.appendChild(makeChip(e, detail));
+  });
+
+  upcoming.forEach(e => {
+    const inDays = dayDiff(today, e.startD);
+    const detail = inDays === 1 ? 'Tomorrow' : `in ${inDays}d`;
+    strip.appendChild(makeChip(e, detail));
+  });
+}
+
+function makeChip(e, detail){
+  const chip = document.createElement('div');
+  chip.className = 'status-chip dot-' + e.type;
+  const dot = document.createElement('span');
+  dot.className = 'dot';
+  chip.appendChild(dot);
+  const text = document.createElement('span');
+  text.textContent = `${e.name} - ${TYPE_LABELS[e.type]}`;
+  chip.appendChild(text);
+  const det = document.createElement('span');
+  det.className = 'chip-detail';
+  det.textContent = detail;
+  chip.appendChild(det);
+  return chip;
+}
+
+/* ============================================================
+   Build the 12-month grid with spanning named bars
+   ============================================================ */
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function buildYearGrid(events){
+  const grid = document.getElementById('yearGrid');
+  grid.innerHTML = '';
+  document.getElementById('yearLabel').textContent = `${YEAR} Breeding Calendar`;
+
+  const enriched = events.map(ev => {
+    const start = parseYMD(ev.start);
+    const end = ev.end ? parseYMD(ev.end) : start;
+    return { ...ev, startD: start, endD: end, name: extractName(ev.title) };
+  });
+
+  const todayKey = ymd(new Date());
+
+  for (let m = 0; m < 12; m++) {
+    const monthStart = new Date(YEAR, m, 1);
+    const monthEnd = new Date(YEAR, m + 1, 0);
+    const firstDow = monthStart.getDay();
+    const totalDays = daysInMonth(YEAR, m);
+    const numRows = Math.ceil((firstDow + totalDays) / 7);
+
+    const card = document.createElement('div');
+    card.className = 'month-card';
+
+    const name = document.createElement('div');
+    name.className = 'month-name';
+    name.textContent = MONTH_NAMES[m];
+    card.appendChild(name);
+
+    const dowRow = document.createElement('div');
+    dowRow.className = 'dow-row';
+    ['S','M','T','W','T','F','S'].forEach(d => {
+      const s = document.createElement('span');
+      s.textContent = d;
+      dowRow.appendChild(s);
+    });
+    card.appendChild(dowRow);
+
+    const body = document.createElement('div');
+    body.className = 'calendar-body';
+
+    // Day-number layer
+    const dayGrid = document.createElement('div');
+    dayGrid.className = 'day-grid';
+    dayGrid.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+
+    for (let i = 0; i < firstDow; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'day-cell empty';
+      dayGrid.appendChild(cell);
+    }
+    for (let d = 1; d <= totalDays; d++) {
+      const cell = document.createElement('div');
+      const key = `${YEAR}-${pad(m+1)}-${pad(d)}`;
+      cell.className = 'day-cell' + (key === todayKey ? ' is-today' : '');
+      const num = document.createElement('div');
+      num.className = 'day-num';
+      num.textContent = d;
+      cell.appendChild(num);
+      dayGrid.appendChild(cell);
+    }
+    body.appendChild(dayGrid);
+
+    // Events layer: spanning bars, split per calendar week row
+    const eventsLayer = document.createElement('div');
+    eventsLayer.className = 'events-layer';
+    eventsLayer.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+
+    // events relevant to this month
+    const monthEvents = enriched.filter(e => e.startD <= monthEnd && e.endD >= monthStart);
+
+    // stacking: track how many bars already placed per (row) to offset vertically isn't needed
+    // since ev-block uses align-self:end and natural stacking within cell via multiple children per row-col span.
+    monthEvents.forEach(e => {
+      const clipStart = e.startD < monthStart ? monthStart : e.startD;
+      const clipEnd = e.endD > monthEnd ? monthEnd : e.endD;
+
+      let cur = new Date(clipStart);
+      while (cur <= clipEnd) {
+        const dayIndexInMonth = cur.getDate();
+        const cellIndex = firstDow + dayIndexInMonth - 1;
+        const row = Math.floor(cellIndex / 7);
+        const colStart = cellIndex % 7;
+
+        // extend segment across this row while still within range and same row
+        let segDays = 1;
+        let nextCol = colStart + 1;
+        let peek = new Date(cur);
+        while (nextCol < 7) {
+          peek.setDate(peek.getDate() + 1);
+          if (peek > clipEnd) break;
+          segDays++;
+          nextCol++;
+        }
+
+        const block = document.createElement('div');
+        block.className = 'ev-block ev-' + e.type + (segDays === 1 ? ' ev-block-narrow' : '');
+        block.style.gridRow = (row + 1);
+        block.style.gridColumn = (colStart + 1) + ' / span ' + segDays;
+        block.textContent = `${e.name} - ${TYPE_LABELS[e.type]}`;
+        eventsLayer.appendChild(block);
+
+        cur.setDate(cur.getDate() + segDays);
+      }
+    });
+
+    body.appendChild(eventsLayer);
+    card.appendChild(body);
+    grid.appendChild(card);
+  }
+}
+
+/* ============================================================
+   Minimal iCal parser
+   ============================================================ */
+function parseICS(text) {
+  const events = [];
+  const lines = text.split(/\r\n|\n|\r/);
+  const unfolded = [];
+  for (const line of lines) {
+    if (line.startsWith(' ') && unfolded.length) {
+      unfolded[unfolded.length - 1] += line.slice(1);
+    } else {
+      unfolded.push(line);
+    }
+  }
+
+  let cur = null;
+  for (const line of unfolded) {
+    if (line === 'BEGIN:VEVENT') { cur = {}; continue; }
+    if (line === 'END:VEVENT') {
+      if (cur && cur.summary && cur.start) {
+        const matched = KEYWORD_MAP.find(k => k.re.test(cur.summary));
+        if (matched) {
+          events.push({
+            title: cur.summary,
+            type: matched.type,
+            start: cur.start,
+            end: cur.end && cur.end !== cur.start ? cur.end : undefined
+          });
+        }
+      }
+      cur = null;
+      continue;
+    }
+    if (!cur) continue;
+
+    const idx = line.indexOf(':');
+    if (idx === -1) continue;
+    const rawKey = line.slice(0, idx);
+    const value = line.slice(idx + 1);
+    const key = rawKey.split(';')[0];
+
+    if (key === 'SUMMARY') cur.summary = value.replace(/\\,/g, ',').replace(/\\;/g,';');
+    if (key === 'DTSTART') cur.start = icsDateToYMD(value);
+    if (key === 'DTEND') {
+      const end = icsDateToYMD(value);
+      if (end) {
+        const d = parseYMD(end);
+        d.setDate(d.getDate() - 1);
+        cur.end = ymd(d);
+      }
+    }
+  }
+  return events;
+}
+
+function icsDateToYMD(v) {
+  const m = v.match(/^(\d{4})(\d{2})(\d{2})/);
+  if (!m) return null;
+  return `${m[1]}-${m[2]}-${m[3]}`;
+}
+
+/* ============================================================
+   Fetch + init
+   ============================================================ */
+function renderEvents(events){
+  buildYearGrid(events);
+  buildStatusStrip(events);
+}
+
+async function loadCalendar() {
+  const pill = document.getElementById('statusPill');
+  const footer = document.getElementById('footerNote');
+
+  if (!ICAL_URL) {
+    renderEvents(SAMPLE_EVENTS);
+    pill.textContent = 'Sample data';
+    return;
+  }
+
+  pill.textContent = 'Loading calendar…';
+
+  const attempts = [
+    ICAL_URL,
+    ...CORS_PROXIES.map(fn => fn(ICAL_URL))
+  ];
+
+  for (const url of attempts) {
+    try {
+      pill.textContent = 'Loading calendar… (trying connection)';
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Not a valid iCal feed');
+
+      const events = parseICS(text);
+      console.log('Fetched via:', url);
+      console.log('Raw events found in feed (before keyword filter):', (text.match(/BEGIN:VEVENT/g) || []).length);
+      console.log('Events matched to Heat/Due/Puppies/Go Home keywords:', events);
+
+      if (events.length === 0) {
+        renderEvents(SAMPLE_EVENTS);
+        pill.textContent = 'Connected — no matching events found';
+        pill.className = 'status-pill error';
+        footer.textContent = 'Calendar connected, but no events matched Heat / Due / Puppies / Go Home keywords in titles.';
+        return;
+      }
+
+      renderEvents(events);
+      pill.textContent = 'Live — synced with Google Calendar';
+      pill.className = 'status-pill live';
+      footer.textContent = `Last synced ${new Date().toLocaleString()} · refreshes automatically every 15 minutes`;
+      return;
+    } catch (err) {
+      console.warn('Fetch attempt failed for', url, err);
+      continue;
+    }
+  }
+
+  renderEvents(SAMPLE_EVENTS);
+  pill.textContent = 'Showing sample data — connection failed';
+  pill.className = 'status-pill error';
+  footer.textContent = 'Could not reach Google Calendar from this browser. See notes below the dashboard for fixes.';
+}
+
+loadCalendar();
+setInterval(loadCalendar, 15 * 60 * 1000);
+</script>
+
+</body>
+</html>
+
 <title>Coppercloud Labradoodles — Breeding Calendar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
