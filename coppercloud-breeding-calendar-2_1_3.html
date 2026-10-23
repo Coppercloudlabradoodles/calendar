@@ -391,7 +391,8 @@ const SAMPLE_EVENTS = [
    Date helpers
    ============================================================ */
 function pad(n){ return String(n).padStart(2,'0'); }
-function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function evEmoji(t){ const m = (t||'').match(/\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*/u); return m ? m[0] + ' ' : ''; }
+  function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function parseYMD(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
 function dayDiff(a,b){ return Math.round((b-a)/(1000*60*60*24)); }
@@ -513,7 +514,7 @@ function makeChip(e, detail){
   dot.style.background = info.color;
   chip.appendChild(dot);
   const text = document.createElement('span');
-  text.textContent = `${e.name} - ${info.label}`;
+  text.textContent = `${e.name} - ${evEmoji(e.title)}${info.label}`;
   chip.appendChild(text);
   const det = document.createElement('span');
   det.className = 'chip-detail';
@@ -655,7 +656,7 @@ function buildYearGrid(events){
         }
         block.style.gridColumn = colFrom + ' / span ' + colSpan;
         const label = document.createElement('span');
-        label.textContent = `${e.name} - ${info.label}`;
+        label.textContent = `${e.name} - ${evEmoji(e.title)}${info.label}`;
         block.appendChild(label);
         eventsLayer.appendChild(block);
 
